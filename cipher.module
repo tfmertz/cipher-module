@@ -23,18 +23,21 @@ function cipher_form() {
         '#type' => 'textfield',
         '#description' => t('Enter the phrase to encrypt.'),
         '#element_validate' => array('element_validate_cipher_word'),
+        "#required" => TRUE,
     );
     $form['shift'] = array(
         '#title' => 'Shift',
         '#type' => 'textfield',
         '#description' => t('Enter the amount of letters to shift.'),
         '#element_validate' => array('element_validate_integer_positive', 'element_validate_cipher_range'),
+        "#required" => TRUE,
     );
     $form['shift_direction'] = array(
         '#title' => 'Shift Direction',
         '#type' => 'textfield',
         '#description' => t('Enter left or right'),
         '#element_validate' => array('element_validate_cipher_leftright'),
+        "#required" => TRUE,
     );
     $form['submit'] = array(
         '#type' => 'submit',
@@ -45,7 +48,7 @@ function cipher_form() {
 
 function element_validate_cipher_word($element) {
     //if the phrase isn't made of letters with spaces
-    if(preg_match('/[^a-zA-Z ,.!?;:]/', $element['#value'])) {
+    if(preg_match('/[^a-zA-Z ,.!?;:-]/', $element['#value'])) {
         form_error($element, t('Only letters, spaces, and punctuation are supported.'));
     }
 }
@@ -85,7 +88,7 @@ function cipher_results() {
     //loop through the string and convert the letters
     for($i = 0; $i < strlen($phrase); $i++) {
         //if it's a space or punct, skip to the next letter
-        if(preg_match('/[ ,.!?;:]/', $phrase[$i])) {
+        if(preg_match('/[ ,.!?;:-]/', $phrase[$i])) {
             $encryption .= $phrase[$i];
             continue;
         }
