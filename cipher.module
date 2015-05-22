@@ -45,8 +45,8 @@ function cipher_form() {
 
 function element_validate_cipher_word($element) {
     //if the phrase isn't made of letters with spaces
-    if(preg_match('/[^a-zA-Z ]/', $element['#value'])) {
-        form_error($element, t('Only letters and spaces are supported.'));
+    if(preg_match('/[^a-zA-Z ,.!?;:]/', $element['#value'])) {
+        form_error($element, t('Only letters, spaces, and punctuation are supported.'));
     }
 }
 
@@ -84,8 +84,9 @@ function cipher_results() {
     $encryption = "";
     //loop through the string and convert the letters
     for($i = 0; $i < strlen($phrase); $i++) {
-        //if it's a space, skip to the next letter
-        if($phrase[$i] == ' ') {
+        //if it's a space or punct, skip to the next letter
+        if(preg_match('/[ ,.!?;:]/', $phrase[$i])) {
+            $encryption .= $phrase[$i];
             continue;
         }
         //lowercase the letter then turn it into ascii
@@ -102,8 +103,5 @@ function cipher_results() {
         //add the new letter to the string
         $encryption .= chr($ascii);
     }
-
-    $output = "";
-    $output .= "$phrase = $ascii, $shift, $direction, $encryption";
-    return $output;
+    return "<h2><strong>Your secret encryption is:</strong> $encryption</h2>";
 }
