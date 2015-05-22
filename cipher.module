@@ -1,0 +1,55 @@
+<?php
+
+function cipher_menu() {
+    $items['cipher-form'] = array(
+        'title' => 'Cipher',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('cipher_form'),
+        'access callback' => TRUE,
+        'type' => MENU_NORMAL_ITEM,
+    );
+    $items['cipher-success'] = array(
+        'title' => 'Results',
+        'page callback' => 'cipher_results',
+        'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+    );
+    return $items;
+}
+
+function cipher_form() {
+    $form['phrase'] = array(
+        '#title' => 'Phrase',
+        '#type' => 'textfield',
+        '#description' => t('Enter the phrase to encrypt.'),
+    );
+    $form['shift'] = array(
+        '#title' => 'Shift',
+        '#type' => 'textfield',
+        '#description' => t('Enter the amount of letters to shift.'),
+    );
+    $form['shift_direction'] = array(
+        '#title' => 'Shift Direction',
+        '#type' => 'textfield',
+        '#description' => t('Enter left or right'),
+    );
+    $form['submit'] = array(
+        '#type' => 'submit',
+        '#value' => 'Encrypt',
+    );
+    return $form;
+}
+
+function cipher_form_submit($form, &$form_state) {
+    $phrase = $form_state['values']['phrase'];
+    $shift = $form_state['values']['shift'];
+    $direction = $form_state['values']['shift_direction'];
+    $_SESSION['cipher_input'] = array($phrase, $shift, $direction);
+    $form_state['redirect'] = 'cipher-success';
+}
+
+function cipher_results() {
+    $input = $_SESSION['cipher_input'];
+
+    return "$input[0], $input[1], $input[2]";
+}
