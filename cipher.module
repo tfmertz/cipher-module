@@ -22,22 +22,46 @@ function cipher_form() {
         '#title' => 'Phrase',
         '#type' => 'textfield',
         '#description' => t('Enter the phrase to encrypt.'),
+        '#element_validate' => array('element_validate_cipher_word'),
     );
     $form['shift'] = array(
         '#title' => 'Shift',
         '#type' => 'textfield',
         '#description' => t('Enter the amount of letters to shift.'),
+        '#element_validate' => array('element_validate_integer_positive', 'element_validate_cipher_range'),
     );
     $form['shift_direction'] = array(
         '#title' => 'Shift Direction',
         '#type' => 'textfield',
         '#description' => t('Enter left or right'),
+        '#element_validate' => array('element_validate_cipher_leftright'),
     );
     $form['submit'] = array(
         '#type' => 'submit',
         '#value' => 'Encrypt',
     );
     return $form;
+}
+
+function element_validate_cipher_word($element) {
+    //if the phrase isn't made of letters with spaces
+    if(preg_match('/[^a-zA-Z ]/', $element['#value'])) {
+        form_error($element, t('Only letters and spaces are supported.'));
+    }
+}
+
+function element_validate_cipher_range($element) {
+    //if the shift isn't between 1 and 25
+    if($element['#value'] > 25 || $element['#value'] < 1) {
+        form_error($element, t('Please enter a number between 1 and 25.'));
+    }
+}
+
+function element_validate_cipher_leftright($element) {
+    //if it isn't left or right
+    if($element['#value'] != 'left' && $element['#value'] != 'right') {
+        form_error($element, t('Must be either left or right.'));
+    }
 }
 
 function cipher_form_submit($form, &$form_state) {
@@ -50,6 +74,36 @@ function cipher_form_submit($form, &$form_state) {
 
 function cipher_results() {
     $input = $_SESSION['cipher_input'];
+    //store the phrase in an array
+    $phrase = $input[0];
+    $direction = $input[2];
+    //make shift negative if we are left and positive if we are right
+    $shift = ($direction == 'left') ? 0 - $input[1] : $input[1];
 
-    return "$input[0], $input[1], $input[2]";
+
+    $encryption = "";
+    //loop through the string and convert the letters
+    for($i = 0; $i < strlen($phrase); $i++) {
+        //if it's a space, skip to the next letter
+        if($phrase[$i] == ' ') {
+            continue;
+        }
+        //lowercase the letter then turn it into ascii
+        $ascii = ord(strtolower($phrase[$i]));
+        //add/sub the shift to the ascii
+        $ascii += $shift;
+        //if it's less than 97, add 26 to wrap to the end of the alphabet
+        if($ascii < 97) {
+            $ascii += 26;
+        }
+        elseif($ascii > 122) {
+            $ascii -= 26;
+        }
+        //add the new letter to the string
+        $encryption .= chr($ascii);
+    }
+
+    $output = "";
+    $output .= "$phrase = $ascii, $shift, $direction, $encryption";
+    return $output;
 }
